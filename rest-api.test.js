@@ -65,3 +65,33 @@ describe('GET /movies', () => {
   });
 });
 
+describe('DELETE /movies', () => {
+  let createdMovie;
+
+  beforeEach(async () => {
+    const res = await fetch('https://tokenservice-rough-frost-9409.fly.dev/movies', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwtToken}`
+      },
+      body: JSON.stringify({
+        title: 'Delete Me',
+        productionYear: 2022,
+        description: 'To be deleted',
+        director: 'Delete Director'
+      })
+    });
+    createdMovie = await res.json();
+  });
+
+  test('DELETE /movies/:id removes the movie', async () => {
+    const res = await fetch(`https://tokenservice-rough-frost-9409.fly.dev/movies/${createdMovie.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      }
+    });
+    expect(res.status).toBe(204);
+  });
+});
