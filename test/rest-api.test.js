@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll } from "vitest";
+import { describe, test, expect, beforeAll, beforeEach, afterEach } from "vitest";
 
 let jwtToken;
 // This runs once before all test suites
@@ -93,5 +93,35 @@ describe('DELETE /movies', () => {
       }
     });
     expect(res.status).toBe(204);
+  });
+});
+
+describe('POST and DELETE /movies', () => {
+  test('should create and delete a movie', async () => {
+    const postRes = await fetch('https://tokenservice-rough-frost-9409.fly.dev/movies', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwtToken}`
+      },
+      body: JSON.stringify({
+        title: 'One-time Movie',
+        productionYear: 2021,
+        description: 'Temporary',
+        director: 'Flash'
+      })
+    });
+
+    expect(postRes.status).toBe(201);
+    const movie = await postRes.json();
+
+    const deleteRes = await fetch(`https://tokenservice-rough-frost-9409.fly.dev/movies/${movie.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      }
+    });
+
+    expect(deleteRes.status).toBe(204);
   });
 });
