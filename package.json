@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev":"...",
-    "build":"...",
-    "test":"vitest"
+    "dev": "...",
+    "build": "...",
+    "test": "vitest"
   },
   "dependencies": {
     "react": "^19.0.0",
