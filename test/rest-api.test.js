@@ -24,23 +24,23 @@ beforeAll(async () => {
 
   if (!res.ok) {
     const error = await res.text();
-    console.error("❌ Login failed:", error);
+    console.error("Login failed:", error);
     throw new Error("Could not fetch JWT token");
   }
 
   jwtToken = await res.text();
-  console.log("✅ JWT token fetched:", jwtToken);
+  console.log("JWT token fetched:", jwtToken);
 
-  // Prevent race conditions in Vitest
+
   await new Promise((resolve) => setTimeout(resolve, 200));
 });
 
-// ========== GET /movies ==========
 describe("GET /movies", () => {
   let createdMovie;
 
+
   beforeEach(async () => {
-    console.log("🔐 Using token (GET block):", jwtToken);
+    console.log(" Using token (GET block):", jwtToken);
     const res = await fetch("https://tokenservice-jwt-2025.fly.dev/movies", {
       method: "POST",
       headers: {
@@ -57,12 +57,13 @@ describe("GET /movies", () => {
 
     if (!res.ok) {
       const error = await res.text();
-      console.error("❌ Movie creation failed (GET block):", res.status, error);
+      console.error("Movie creation failed (GET block):", res.status, error);
       throw new Error("Failed to create test movie");
     }
 
     createdMovie = await res.json();
   });
+ 
 
   afterEach(async () => {
     await fetch(
@@ -96,12 +97,12 @@ describe("GET /movies", () => {
   });
 });
 
-// ========== DELETE /movies ==========
+
 describe("DELETE /movies", () => {
   let createdMovie;
 
   beforeEach(async () => {
-    console.log("🔐 Using token (DELETE block):", jwtToken);
+    console.log("Using token (DELETE block):", jwtToken);
     const res = await fetch("https://tokenservice-jwt-2025.fly.dev/movies", {
       method: "POST",
       headers: {
@@ -119,7 +120,7 @@ describe("DELETE /movies", () => {
     if (!res.ok) {
       const error = await res.text();
       console.error(
-        "❌ Movie creation failed (DELETE block):",
+        "Movie creation failed (DELETE block):",
         res.status,
         error
       );
@@ -147,7 +148,7 @@ describe("DELETE /movies", () => {
 // ========== POST and DELETE ==========
 describe("POST and DELETE /movies", () => {
   test("should create and delete a movie", async () => {
-    console.log("🔐 Using token (POST+DELETE block):", jwtToken);
+    console.log("Using token (POST+DELETE block):", jwtToken);
     const postRes = await fetch(
       "https://tokenservice-jwt-2025.fly.dev/movies",
       {
@@ -168,11 +169,12 @@ describe("POST and DELETE /movies", () => {
 
     if (!postRes.ok) {
       const error = await postRes.text();
-      console.error("❌ Movie POST failed:", postRes.status, error);
+      console.error("Movie POST failed:", postRes.status, error);
       throw new Error("POST failed");
     }
 
     const movie = await postRes.json();
+   
 
     const deleteRes = await fetch(
       `https://tokenservice-jwt-2025.fly.dev/movies/${movie.id}`,
@@ -193,7 +195,7 @@ describe("PUT /movies", () => {
   let createdMovie;
 
   beforeEach(async () => {
-    console.log("🔐 Using token (PUT block):", jwtToken);
+    console.log(" Using token (PUT block):", jwtToken);
     const res = await fetch("https://tokenservice-jwt-2025.fly.dev/movies", {
       method: "POST",
       headers: {
@@ -210,7 +212,7 @@ describe("PUT /movies", () => {
 
     if (!res.ok) {
       const error = await res.text();
-      console.error("❌ Movie creation failed (PUT block):", res.status, error);
+      console.error("Movie creation failed (PUT block):", res.status, error);
       throw new Error("Failed to create test movie");
     }
 
