@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   describe,
   test,
@@ -7,257 +8,150 @@ import {
   afterEach,
 } from "vitest";
 
+const MainURL = "https://tokenservice-jwt-2025.fly.dev";
+const MoviesURL = `${MainURL}/movies`;
+const LoginURL = `${MainURL}/token-service/v1/request-token`;
+
 let jwtToken;
 
-beforeAll(async () => {
-  const res = await fetch(
-    "https://tokenservice-jwt-2025.fly.dev/token-service/v1/request-token",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: "group6testing",
-        password: "securepass123",
-      }),
-    }
-  );
 
-  if (!res.ok) {
-    const error = await res.text();
-    console.error("Login failed:", error);
+beforeAll(async () => {
+  try {
+    const res = await axios.post(LoginURL, {
+      username: "group6testing",
+      password: "securepass123",
+    });
+
+    jwtToken = res.data;
+    console.log("Token fetched");
+  } catch (err) {
+    console.error("Login failed:", err.response?.data || err.message);
     throw new Error("Could not fetch JWT token");
   }
-
-  jwtToken = await res.text();
-  console.log("JWT token fetched:", jwtToken);
-
-
-  await new Promise((resolve) => setTimeout(resolve, 200));
 });
 
+
+const api = () =>
+  axios.create({
+    baseURL: MoviesURL,
+    headers: {
+      Authorization: `Bearer ${jwtToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+// 🔁 Create movie helper
+const createTestMovie = async (movieData) => {
+  try {
+    const res = await api().post("", movieData);
+    return res.data;
+  } catch (err) {
+    console.error(
+      "Failed to create movie:",
+      err.response?.status,
+      err.response?.data
+    );
+    throw new Error("Movie creation failed");
+  }
+};
+
+// ========= GET =========
 describe("GET /movies", () => {
   let createdMovie;
 
-
   beforeEach(async () => {
-    console.log(" Using token (GET block):", jwtToken);
-    const res = await fetch("https://tokenservice-jwt-2025.fly.dev/movies", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: "Test Movie",
-        productionYear: 2023,
-        description: "This is a test movie.To test api functionality",
-        director: "Test Director",
-      }),
+    createdMovie = await createTestMovie({
+      title: "This is our movie",
+      productionYear: 2023,
+      description:
+        "This movie was created to test the GET endpoint, did it work?",
+      director: "Group 6 director",
     });
-
-    if (!res.ok) {
-      const error = await res.text();
-      console.error("Movie creation failed (GET block):", res.status, error);
-      throw new Error("Failed to create test movie");
-    }
-
-    createdMovie = await res.json();
   });
- 
 
   afterEach(async () => {
-    await fetch(
-      `https://tokenservice-jwt-2025.fly.dev/movies/${createdMovie.id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      }
-    );
+    await api().delete(`/${createdMovie.id}`);
   });
 
-  test("GET /movies returns array", async () => {
-    const res = await fetch("https://tokenservice-jwt-2025.fly.dev/movies", {
-      headers: { Authorization: `Bearer ${jwtToken}` },
-    });
-    const data = await res.json();
+  test("returns an array of movies", async () => {
+    const res = await api().get("");
     expect(res.status).toBe(200);
-    expect(Array.isArray(data)).toBe(true);
+    expect(Array.isArray(res.data)).toBe(true);
   });
 
-  test("GET /movies/:id returns correct movie", async () => {
-    const res = await fetch(
-      `https://tokenservice-jwt-2025.fly.dev/movies/${createdMovie.id}`,
-      {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      }
-    );
-    const data = await res.json();
+  test("returns one movie by ID", async () => {
+    const res = await api().get(`/${createdMovie.id}`);
     expect(res.status).toBe(200);
-    expect(data.title).toBe("Test Movie");
+    expect(res.data.title).toBe("This is our movie");
   });
 });
 
-
+// ========= DELETE =========
 describe("DELETE /movies", () => {
-  let createdMovie;
+  let movie;
 
   beforeEach(async () => {
-    console.log("Using token (DELETE block):", jwtToken);
-    const res = await fetch("https://tokenservice-jwt-2025.fly.dev/movies", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: "Delete Me",
-        productionYear: 2022,
-        description: "To be deleted, used to test the api functionality",
-        director: "Delete Director",
-      }),
+    movie = await createTestMovie({
+      title: "This movie is made to delete",
+      productionYear: 2022,
+      description: "This movie will be deleted after this test runs.",
+      director: "Group 6 delete",
     });
-
-    if (!res.ok) {
-      const error = await res.text();
-      console.error(
-        "Movie creation failed (DELETE block):",
-        res.status,
-        error
-      );
-      throw new Error("Failed to create test movie");
-    }
-
-    createdMovie = await res.json();
   });
 
-  test("DELETE /movies/:id removes the movie", async () => {
-    const res = await fetch(
-      `https://tokenservice-jwt-2025.fly.dev/movies/${createdMovie.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-        },
-      }
-    );
-
+  test("removed movie success", async () => {
+    const res = await api().delete(`/${movie.id}`);
     expect(res.status).toBe(204);
   });
 });
 
-// ========== POST and DELETE ==========
+// ========= POST and DELETE combined =========
 describe("POST and DELETE /movies", () => {
-  test("should create and delete a movie", async () => {
-    console.log("Using token (POST+DELETE block):", jwtToken);
-    const postRes = await fetch(
-      "https://tokenservice-jwt-2025.fly.dev/movies",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: "Temp Movie",
-          productionYear: 2024,
-          description:
-            "Created and deleted in one test and this is to test api",
-          director: "One-Time Director",
-        }),
-      }
-    );
+  test("creates and deletes a movie at one time", async () => {
+    const res = await api().post("", {
+      title: "This movie is only here for now",
+      productionYear: 2024,
+      description:
+        "Created and deleted this movie to make sure the test works.",
+      director: "group 6 post and delete",
+    });
 
-    if (!postRes.ok) {
-      const error = await postRes.text();
-      console.error("Movie POST failed:", postRes.status, error);
-      throw new Error("POST failed");
-    }
+    expect(res.status).toBe(201);
+    const movie = res.data;
 
-    const movie = await postRes.json();
-   
-
-    const deleteRes = await fetch(
-      `https://tokenservice-jwt-2025.fly.dev/movies/${movie.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-        },
-      }
-    );
-
+    const deleteRes = await api().delete(`/${movie.id}`);
     expect(deleteRes.status).toBe(204);
   });
 });
 
-// ========== PUT and GET ==========
+// ========= PUT =========
 describe("PUT /movies", () => {
-  let createdMovie;
+  let movie;
 
   beforeEach(async () => {
-    console.log(" Using token (PUT block):", jwtToken);
-    const res = await fetch("https://tokenservice-jwt-2025.fly.dev/movies", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: "Old Title",
-        productionYear: 2021,
-        description: "This movie was created to test the API's functionality.",
-        director: "Old Director",
-      }),
+    movie = await createTestMovie({
+      title: "This is the movie that needs to be updated",
+      productionYear: 2021,
+      description: "A movie thats meant to be updated in the next test.",
+      director: "Group 6 creator",
     });
-
-    if (!res.ok) {
-      const error = await res.text();
-      console.error("Movie creation failed (PUT block):", res.status, error);
-      throw new Error("Failed to create test movie");
-    }
-
-    createdMovie = await res.json();
   });
 
   afterEach(async () => {
-    await fetch(
-      `https://tokenservice-jwt-2025.fly.dev/movies/${createdMovie.id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      }
-    );
+    await api().delete(`/${movie.id}`);
   });
 
-  test("should update movie title and confirm with GET", async () => {
-    const updateRes = await fetch(
-      `https://tokenservice-jwt-2025.fly.dev/movies/${createdMovie.id}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: "Updated Title",
-          productionYear: 2021,
-          description:
-            "This movie was created to test the API's functionality.",
-          director: "Old Director",
-        }),
-      }
-    );
+  test("updates the movie title", async () => {
+    const updateRes = await api().put(`/${movie.id}`, {
+      title: "The title after being updated",
+      productionYear: 2021,
+      description: "This test will update the info in this movie.",
+      director: "Group 6 updated",
+    });
 
     expect(updateRes.status).toBe(200);
 
-    const getRes = await fetch(
-      `https://tokenservice-jwt-2025.fly.dev/movies/${createdMovie.id}`,
-      {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      }
-    );
-
-    const updatedMovie = await getRes.json();
-    expect(updatedMovie.title).toBe("Updated Title");
+    const getRes = await api().get(`/${movie.id}`);
+    expect(getRes.data.title).toBe("The title after being updated");
   });
 });
