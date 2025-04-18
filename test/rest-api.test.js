@@ -40,7 +40,7 @@ const api = () =>
     },
   });
 
-// 🔁 Create movie helper
+
 const createTestMovie = async (movieData) => {
   try {
     const res = await api().post("", movieData);
@@ -55,7 +55,7 @@ const createTestMovie = async (movieData) => {
   }
 };
 
-// ========= GET =========
+
 describe("GET /movies", () => {
   let createdMovie;
 
@@ -86,7 +86,7 @@ describe("GET /movies", () => {
   });
 });
 
-// ========= DELETE =========
+
 describe("DELETE /movies", () => {
   let movie;
 
@@ -105,7 +105,6 @@ describe("DELETE /movies", () => {
   });
 });
 
-// ========= POST and DELETE combined =========
 describe("POST and DELETE /movies", () => {
   test("creates and deletes a movie at one time", async () => {
     const res = await api().post("", {
@@ -124,7 +123,7 @@ describe("POST and DELETE /movies", () => {
   });
 });
 
-// ========= PUT =========
+
 describe("PUT /movies", () => {
   let movie;
 
