@@ -12,8 +12,8 @@ export const handlers = [
 
     if (authHeader === "Bearer mocked-token") {
       return HttpResponse.json([
-        { title: "The Matrix" },
-        { title: "Inception" },
+        { title: "The group 6 movie" },
+        { title: "movie number 2" },
       ]);
     }
 
