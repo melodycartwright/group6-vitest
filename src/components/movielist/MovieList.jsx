@@ -6,6 +6,6 @@ const MovieList = () => {
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
 
-  return <></>;
+  return <>hej</>;
 };
 export default MovieList;
