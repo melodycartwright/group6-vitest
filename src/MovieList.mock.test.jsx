@@ -1,4 +1,4 @@
-import {beforeAll, afterEach, afterEach, afterAll} from 'vitest';
+import {beforeAll, afterEach, afterAll} from 'vitest';
 import { server } from './mocks/server';
 import 'whatwg-fetch';
 
