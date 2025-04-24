@@ -1,10 +1,11 @@
 import "./App.css";
-import MovieList from "./components/movielist/MovieList";
+import AddMovie from "./components/AddMovie/AddMovie";
+
 
 function App() {
   return (
     <>
-      <MovieList />
+      <AddMovie />
     </>
   );
 }

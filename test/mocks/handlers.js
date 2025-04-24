@@ -6,6 +6,10 @@ export const handlers = [
   http.post(`${API_BASE}/token-service/v1/request-token`, async () => {
     return new HttpResponse("mocked-token", { status: 200 });
   }),
+  
+  http.post(`${API_BASE}/movies`, async () => {
+    return new HttpResponse("baläsh", { status: 201 })
+  }),
 
   http.get(`${API_BASE}/movies`, ({ request }) => {
     const authHeader = request.headers.get("Authorization");
