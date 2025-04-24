@@ -25,8 +25,9 @@ const MovieList = () => {
       if (!response.ok) throw new Error("Login failed");
 
       const token = await response.text();
+      localStorage.setItem("jwtToken", token);
       setToken(token);
-
+      
       const moviesResponse = await fetch(
         "https://tokenservice-jwt-2025.fly.dev/movies",
         {

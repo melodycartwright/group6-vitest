@@ -1,53 +1,32 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 
 const API_BASE = "https://tokenservice-jwt-2025.fly.dev";
 
 const AddMovie = () => {
-  const [jwtToken, setJwtToken] = useState("");
   const [title, setTitle] = useState("");
   const [productionYear, setProductionYear] = useState("");
   const [description, setDescription] = useState("");
   const [director, setDirector] = useState("");
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const response = await axios.post(
-          `${API_BASE}/token-service/v1/request-token`,
-          {
-            username: "USER",
-            password: "password",
-          }
-        );
-        setJwtToken(response.data);
-      } catch (err) {
-        console.error("Token fetch failed:", err.message);
-      }
-    };
-
-    fetchToken();
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const jwtToken = localStorage.getItem("jwtToken");
     const formData = {
       title,
       productionYear,
       description,
       director,
     };
-  
     
     try {
       const response = await axios.post(`${API_BASE}/movies`, formData, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${jwtToken}`,
         },
       });
-
+      console.log('Response:', response);
       if (response.status === 201) {
         setMessage("Movie added successfully.");
       } else {

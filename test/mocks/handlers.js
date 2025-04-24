@@ -10,6 +10,7 @@ export const handlers = [
 
 
   http.post(`${API_BASE}/movies`, async ({ request }) => {
+    console.log('request intercepted')
     const newMovie = await request.json();
     return HttpResponse.json({ ...newMovie, id: Date.now() }, { status: 201 });
   }),
