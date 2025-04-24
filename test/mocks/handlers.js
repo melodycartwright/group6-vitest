@@ -3,18 +3,18 @@ import { http, HttpResponse } from "msw";
 const API_BASE = "https://tokenservice-jwt-2025.fly.dev";
 
 export const handlers = [
-  // 🔐 Mock login - returns a fake JWT token
+ 
   http.post(`${API_BASE}/token-service/v1/request-token`, async () => {
     return new HttpResponse("mocked-token", { status: 200 });
   }),
 
-  // 🎥 Mock POST /movies - add a new movie
+
   http.post(`${API_BASE}/movies`, async ({ request }) => {
     const newMovie = await request.json();
     return HttpResponse.json({ ...newMovie, id: Date.now() }, { status: 201 });
   }),
 
-  // 🎥 Mock GET /movies - return all movies
+
   http.get(`${API_BASE}/movies`, ({ request }) => {
     const authHeader = request.headers.get("Authorization");
 
@@ -28,7 +28,7 @@ export const handlers = [
     return HttpResponse.json({ message: "Forbidden" }, { status: 403 });
   }),
 
-  // 🎥 Mock GET /movies/:id - return one movie by ID
+ 
   http.get(`${API_BASE}/movies/:id`, ({ params }) => {
     const { id } = params;
     return HttpResponse.json(
@@ -43,7 +43,6 @@ export const handlers = [
     );
   }),
 
-  // ✏️ Mock PUT /movies/:id - update a movie
   http.put(`${API_BASE}/movies/:id`, async ({ request, params }) => {
     const updatedMovie = await request.json();
     return HttpResponse.json(
@@ -52,12 +51,12 @@ export const handlers = [
     );
   }),
 
-  // ❌ Mock DELETE /movies/:id - delete a movie
+
   http.delete(`${API_BASE}/movies/:id`, ({ params }) => {
     return new HttpResponse(null, { status: 204 });
   }),
 
-  // 🌐 OPTIONS /movies (CORS preflight)
+
   http.options(`${API_BASE}/movies`, () => {
     return new HttpResponse(null, {
       status: 204,
@@ -69,7 +68,7 @@ export const handlers = [
     });
   }),
 
-  // 🌐 OPTIONS /movies/:id (CORS preflight)
+
   http.options(`${API_BASE}/movies/:id`, () => {
     return new HttpResponse(null, {
       status: 204,
