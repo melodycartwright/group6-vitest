@@ -38,7 +38,8 @@ const AddMovie = () => {
       description,
       director,
     };
-
+  
+    
     try {
       const response = await axios.post(`${API_BASE}/movies`, formData, {
         headers: {
@@ -57,6 +58,7 @@ const AddMovie = () => {
       console.error("Add movie error:", error.message);
     }
   };
+  
 
   return (
     <div>
